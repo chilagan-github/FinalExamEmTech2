@@ -49,7 +49,7 @@ def import_and_predict(image_data, model):
         img = np.array(image).astype('float32') / 255.0
 
         # Uncomment if your input image background/foreground needs inversion
-        # img = 1 - img
+        img = 1 - img
 
         # Show preprocessed grayscale image for verification
         st.image(img, caption="Preprocessed 28x28 Grayscale Image", clamp=True)
