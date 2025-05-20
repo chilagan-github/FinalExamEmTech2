@@ -42,9 +42,21 @@ def load_fashion_model():
 def import_and_predict(image_data, model):
     try:
         size = (28, 28)
-        image = ImageOps.grayscale(ImageOps.fit(image_data, size, Image.Resampling.LANCZOS))
+        # Convert image to grayscale and resize
+        image = ImageOps.fit(image_data.convert("L"), size, Image.Resampling.LANCZOS)
+
+        # Convert to numpy array and normalize to [0,1]
         img = np.array(image).astype('float32') / 255.0
+
+        # Uncomment if your input image background/foreground needs inversion
+        # img = 1 - img
+
+        # Show preprocessed grayscale image for verification
+        st.image(img, caption="Preprocessed 28x28 Grayscale Image", clamp=True)
+
+        # Reshape for model input
         img = img.reshape(1, 28, 28, 1)
+
         prediction = model.predict(img)
         return prediction
     except Exception as e:
