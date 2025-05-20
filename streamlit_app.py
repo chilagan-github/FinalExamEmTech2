@@ -4,13 +4,19 @@ import numpy as np
 from PIL import Image, ImageOps
 import os
 
-st.set_page_config(page_title="Fashion Classifier", page_icon="👗")
+# Page config
+st.set_page_config(
+    page_title="Fashion Classifier",
+    page_icon="👗",
+    layout="centered",
+    initial_sidebar_state="expanded",
+)
 
 @st.cache_resource
 def load_fashion_model():
-    model_path = 'best_fashion_cnn_model.h5'
+    model_path = 'best_fashion_cnn_model_tf'  # SavedModel folder
     if not os.path.exists(model_path):
-        st.error(f"Model file not found: {model_path}")
+        st.error(f"Model folder not found: {model_path}")
         return None
     try:
         model = tf.keras.models.load_model(model_path, compile=False)
@@ -23,13 +29,16 @@ def import_and_predict(image_data, model):
     try:
         size = (28, 28)
         image = ImageOps.grayscale(ImageOps.fit(image_data, size, Image.Resampling.LANCZOS))
+
         img_array = np.array(image)
         mean_pixel = np.mean(img_array)
         if mean_pixel > 128:
             image = ImageOps.invert(image)
+
         img = np.array(image).astype('float32') / 255.0
-        st.write("Processed image:")
+        st.write("Processed image (how the model sees it):")
         st.image(img, width=150)
+
         img_reshape = img.reshape(1, 28, 28, 1)
         prediction = model.predict(img_reshape)
         return prediction
@@ -42,10 +51,23 @@ if model is None:
     st.stop()
 
 st.title("🧥 Fashion Clothes Classifier")
-st.write("Upload a fashion item photo and get a prediction.")
+st.write(
+    """
+    Upload a fashion item photo (grayscale or color) and the model will predict its class.
+    """
+)
+
+st.sidebar.header("Instructions")
+st.sidebar.write("""
+1. Upload an image (jpg or png).
+2. The model expects a 28x28 grayscale image.
+3. Wait for prediction and see results below.
+""")
 
 file = st.file_uploader("Upload Image", type=["jpg", "png"])
-if file is not None:
+if file is None:
+    st.text("Please upload an image file to get started.")
+else:
     image = Image.open(file)
     st.image(image, caption="Uploaded Image", use_column_width=True)
     prediction = import_and_predict(image, model)
@@ -60,5 +82,3 @@ if file is not None:
         st.write(f"**Item:** {class_names[predicted_class]}")
         st.write(f"**Confidence:** {confidence:.2%}")
         st.balloons()
-else:
-    st.text("Please upload an image file to get started.")
