@@ -1,27 +1,91 @@
+
 import streamlit as st
-import numpy as np
 import tensorflow as tf
-from PIL import Image
+import numpy as np
+from PIL import Image, ImageOps
+from tensorflow.keras.preprocessing.image import img_to_array
+from keras.models import load_model
+import os
 
-# Load the model
-model = tf.keras.models.load_model('best_fashion_cnn_model.h5')
+# Page configuration must be set before any Streamlit commands
+st.set_page_config(
+    page_title="Fashion Classifier",
+    page_icon="👗",
+    layout="centered",
+    initial_sidebar_state="expanded",
+)
 
-# Class names
-class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
-               'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+# Function to load the model
+@st.cache_resource
+def load_fashion_model():
+    model_path = 'saved_fashion.h5'
+    if not os.path.exists(model_path):
+        st.error(f"Model file not found: {model_path}")
+        return None
+    try:
+        model = tf.keras.models.load_model(model_path)
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
+        return None
 
-st.title("Fashion Item Classifier")
+# Function to preprocess the image and make predictions
+def import_and_predict(image_data, model):
+    try:
+        size = (28, 28)
+        # Convert image to grayscale and resize
+        image = ImageOps.grayscale(ImageOps.fit(image_data, size, Image.Resampling.LANCZOS))
+        img = np.asarray(image)
+        img = img / 255.0  # Normalize
+        img_reshape = img[np.newaxis, ..., np.newaxis]  # Add batch and channel dimensions
+        prediction = model.predict(img_reshape)
+        return prediction
+    except Exception as e:
+        st.error(f"Error processing image: {e}")
+        return None
 
-uploaded_file = st.file_uploader("Upload a 28x28 grayscale image", type=["png", "jpg", "jpeg"])
+# Load the model once
+model = load_fashion_model()
+if model is None:
+    st.stop()
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file).convert('L').resize((28, 28))
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+# Streamlit UI Design
+st.title("🧥 Fashion Dataset by Espiritu_Castillo")
+st.write(
+    """
+    Welcome to the Fashion Item Classifier! 
+    Upload an image of a fashion item, and the model will predict what type of item it is.
+    """
+)
 
-    # Preprocess
-    image_array = np.array(image).reshape(1, 28, 28, 1) / 255.0
+st.sidebar.write("## Instructions")
+st.sidebar.write(
+    """
+    1. Upload a photo of a fashion item (jpg or png).
+    2. Wait for the model to process and predict.
+    3. See the prediction result below the uploaded image.
+    """
+)
 
-    if st.button("Classify"):
-        prediction = model.predict(image_array)
-        class_id = np.argmax(prediction)
-        st.success(f"Prediction: {class_names[class_id]} ({prediction[0][class_id]*100:.2f}%)")
+file = st.file_uploader("Choose a photo from your computer", type=["jpg", "png"])
+
+if file is None:
+    st.text("Please upload an image file to get started.")
+else:
+    image = Image.open(file)
+    st.image(image, caption='Uploaded Image', use_column_width=True)
+
+    # Perform prediction
+    prediction = import_and_predict(image, model)
+
+    if prediction is not None:
+        class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot']
+        result_class = np.argmax(prediction)
+        result_label = class_names[result_class]
+        confidence = prediction[0][result_class]
+
+        st.write("## Prediction Result")
+        st.write(f"**Item:** {result_label}")
+        st.write(f"**Confidence:** {confidence:.2%}")
+
+        st.balloons()  # Add some celebratory balloons when a prediction is made
