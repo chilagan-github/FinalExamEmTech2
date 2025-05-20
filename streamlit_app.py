@@ -2,7 +2,6 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image, ImageOps
-from tensorflow.keras.models import load_model
 import os
 
 # Page configuration must be set before any Streamlit commands
@@ -16,7 +15,7 @@ st.set_page_config(
 # Function to load the model
 @st.cache_resource
 def load_fashion_model():
-    model_path = 'best_fashion_cnn_model.h5'
+    model_path = 'best_fashion_cnn_model.keras'  # <-- changed to .keras
     if not os.path.exists(model_path):
         st.error(f"Model file not found: {model_path}")
         return None
@@ -26,7 +25,7 @@ def load_fashion_model():
         return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
-        st.info("Tip: If this error persists, try saving the model again in a newer format (e.g., `.keras`).")
+        st.info("Tip: If this error persists, try saving the model again in the latest Keras format (.keras).")
         return None
 
 # Function to preprocess the image and make predictions
