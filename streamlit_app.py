@@ -2,9 +2,11 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image, ImageOps
+from tensorflow.keras.preprocessing.image import img_to_array
+from keras.models import load_model
 import os
 
-# Page config
+# Page configuration must be set before any Streamlit commands
 st.set_page_config(
     page_title="Fashion Classifier",
     page_icon="👗",
@@ -12,73 +14,77 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Function to load the model
 @st.cache_resource
 def load_fashion_model():
-    model_path = 'best_fashion_cnn_model_tf'  # SavedModel folder
+    model_path = 'best_fashion_cnn_model.h5'
     if not os.path.exists(model_path):
-        st.error(f"Model folder not found: {model_path}")
+        st.error(f"Model file not found: {model_path}")
         return None
     try:
-        model = tf.keras.models.load_model(model_path, compile=False)
+        model = tf.keras.models.load_model(model_path)
         return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
 
+# Function to preprocess the image and make predictions
 def import_and_predict(image_data, model):
     try:
         size = (28, 28)
+        # Convert image to grayscale and resize
         image = ImageOps.grayscale(ImageOps.fit(image_data, size, Image.Resampling.LANCZOS))
-
-        img_array = np.array(image)
-        mean_pixel = np.mean(img_array)
-        if mean_pixel > 128:
-            image = ImageOps.invert(image)
-
-        img = np.array(image).astype('float32') / 255.0
-        st.write("Processed image (how the model sees it):")
-        st.image(img, width=150)
-
-        img_reshape = img.reshape(1, 28, 28, 1)
+        img = np.asarray(image)
+        img = img / 255.0  # Normalize
+        img_reshape = img[np.newaxis, ..., np.newaxis]  # Add batch and channel dimensions
         prediction = model.predict(img_reshape)
         return prediction
     except Exception as e:
         st.error(f"Error processing image: {e}")
         return None
 
+# Load the model once
 model = load_fashion_model()
 if model is None:
     st.stop()
 
-st.title("🧥 Fashion Clothes Classifier")
+# Streamlit UI Design
+st.title("🧥 Fashion Classifier")
 st.write(
     """
-    Upload a fashion item photo (grayscale or color) and the model will predict its class.
+    Welcome to the Fashion Item Classifier! 
+    Upload an image of a fashion item, and the model will predict what type of item it is.
     """
 )
 
-st.sidebar.header("Instructions")
-st.sidebar.write("""
-1. Upload an image (jpg or png).
-2. The model expects a 28x28 grayscale image.
-3. Wait for prediction and see results below.
-""")
+st.sidebar.write("## Instructions")
+st.sidebar.write(
+    """
+    1. Upload a photo of a fashion item (jpg or png).
+    2. Wait for the model to process and predict.
+    3. See the prediction result below the uploaded image.
+    """
+)
 
-file = st.file_uploader("Upload Image", type=["jpg", "png"])
+file = st.file_uploader("Choose a photo from your computer", type=["jpg", "png"])
+
 if file is None:
     st.text("Please upload an image file to get started.")
 else:
     image = Image.open(file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption='Uploaded Image', use_column_width=True)
+
+    # Perform prediction
     prediction = import_and_predict(image, model)
+
     if prediction is not None:
-        class_names = [
-            'T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 
-            'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot'
-        ]
-        predicted_class = np.argmax(prediction)
-        confidence = prediction[0][predicted_class]
-        st.subheader("Prediction Result")
-        st.write(f"**Item:** {class_names[predicted_class]}")
+        class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot']
+        result_class = np.argmax(prediction)
+        result_label = class_names[result_class]
+        confidence = prediction[0][result_class]
+
+        st.write("## Prediction Result")
+        st.write(f"**Item:** {result_label}")
         st.write(f"**Confidence:** {confidence:.2%}")
-        st.balloons()
+
+        st.balloons()  # Add some celebratory balloons when a prediction is made
