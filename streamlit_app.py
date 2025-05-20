@@ -15,7 +15,7 @@ st.set_page_config(
 # Load model function - simplified to just use the h5 file directly
 @st.cache_resource
 def load_fashion_model():
-    model_path = 'best_fashion_cnn_model.h5'
+    model = tf.keras.models.load_model('best_fashion_cnn_model.keras', compile=False)
     if not os.path.exists(model_path):
         st.error(f"Model file not found: {model_path}")
         return None
