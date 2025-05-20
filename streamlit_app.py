@@ -6,7 +6,6 @@ import os
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 
-# Page configuration
 st.set_page_config(
     page_title="Fashion Classifier",
     page_icon="👗",
@@ -16,9 +15,8 @@ st.set_page_config(
 
 @st.cache_resource
 def load_fashion_model():
-    weights_path = "best_fashion_cnn_model(1).h5"  # your weights file path
+    weights_path = "best_fashion_cnn_model(1).h5"
 
-    # Define the model architecture (must exactly match the trained model)
     model = Sequential([
         Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
         MaxPooling2D(pool_size=(2, 2)),
