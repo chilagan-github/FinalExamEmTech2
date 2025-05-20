@@ -8,7 +8,7 @@ st.set_page_config(page_title="Fashion Classifier", page_icon="👗")
 
 @st.cache_resource
 def load_fashion_model():
-    model_path = 'best_fashion_cnn_model.keras'
+    model_path = 'best_fashion_cnn_model.h5'
     if not os.path.exists(model_path):
         st.error(f"Model file not found: {model_path}")
         return None
