@@ -14,12 +14,17 @@ st.set_page_config(
 
 @st.cache_resource
 def load_fashion_model():
-    model_path = "best_fashion_cnn_model(1).h5"  # folder, not .h5
+    model_path = "best_fashion_cnn_model(1).h5"  # this is a file
     if not os.path.exists(model_path):
-        st.error(f"Model folder not found: {model_path}")
+        st.error(f"Model file not found: {model_path}")  # fix error message
         return None
     try:
-        model = tf.keras.models.load_model(model_path, compile=False)
+        # Sometimes batch_shape error can be bypassed by custom_objects override
+        model = tf.keras.models.load_model(
+            model_path, 
+            compile=False,
+            custom_objects={'Functional': tf.keras.Model}
+        )
         return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
