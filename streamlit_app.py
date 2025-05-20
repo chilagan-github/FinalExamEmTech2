@@ -15,7 +15,7 @@ st.set_page_config(
 # Load model function
 @st.cache_resource
 def load_fashion_model():
-    model_path = 'best_fashion_cnn_model.keras'  # or .h5 if you keep h5 format
+    model_path = 'best_fashion_cnn_model.h5'  # or .h5 if you keep h5 format
     if not os.path.exists(model_path):
         st.error(f"Model file not found: {model_path}")
         return None
@@ -52,7 +52,7 @@ if model is None:
     st.stop()
 
 # UI
-st.title("🧥 Fashion Dataset by Espiritu_Castillo")
+st.title("🧥 Fashion Clothes Classifier")
 st.write(
     """
     Upload a fashion item photo (grayscale or color) and the model will predict its class.
