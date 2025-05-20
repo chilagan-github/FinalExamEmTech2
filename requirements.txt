@@ -1,9 +1,9 @@
 opencv-python
 Pillow
-numpy
+numpy==1.24.3
 matplotlib
 pandas
 scikit-learn
 keras
 streamlit
-tensorflow
+tensorflow==2.13.0
