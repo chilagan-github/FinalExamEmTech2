@@ -16,7 +16,7 @@ st.set_page_config(
 
 @st.cache_resource
 def load_fashion_model():
-    weights_path = "best_fashion_cnn_model_weights.h5"  # your weights file path
+    weights_path = "best_fashion_cnn_model.h5"  # your weights file path
 
     # Define the model architecture (must exactly match the trained model)
     model = Sequential([
