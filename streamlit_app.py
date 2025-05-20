@@ -18,7 +18,7 @@ st.set_page_config(
 # Function to load the model
 @st.cache_resource
 def load_fashion_model():
-    model_path = 'saved_fashion.h5'
+    model_path = 'best_fashion_cnn_model.h5'
     if not os.path.exists(model_path):
         st.error(f"Model file not found: {model_path}")
         return None
