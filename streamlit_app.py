@@ -3,6 +3,8 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image, ImageOps
 import os
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 
 # Page configuration
 st.set_page_config(
@@ -14,29 +16,37 @@ st.set_page_config(
 
 @st.cache_resource
 def load_fashion_model():
-    model_path = "best_fashion_cnn_model(1).h5"  # this is a file
-    if not os.path.exists(model_path):
-        st.error(f"Model file not found: {model_path}")  # fix error message
+    weights_path = "best_fashion_cnn_model_weights.h5"  # your weights file path
+
+    # Define the model architecture (must exactly match the trained model)
+    model = Sequential([
+        Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+        MaxPooling2D(pool_size=(2, 2)),
+        Conv2D(64, (3, 3), activation='relu'),
+        MaxPooling2D(pool_size=(2, 2)),
+        Flatten(),
+        Dense(128, activation='relu'),
+        Dropout(0.3),
+        Dense(10, activation='softmax')
+    ])
+
+    if not os.path.exists(weights_path):
+        st.error(f"Weights file not found: {weights_path}")
         return None
+
     try:
-        # Sometimes batch_shape error can be bypassed by custom_objects override
-        model = tf.keras.models.load_model(
-            model_path, 
-            compile=False,
-            custom_objects={'Functional': tf.keras.Model}
-        )
+        model.load_weights(weights_path)
         return model
     except Exception as e:
-        st.error(f"Error loading model: {e}")
+        st.error(f"Error loading weights: {e}")
         return None
 
 def import_and_predict(image_data, model):
     try:
         size = (28, 28)
-        # Convert to grayscale and resize
         image = ImageOps.grayscale(ImageOps.fit(image_data, size, Image.Resampling.LANCZOS))
-        img = np.array(image).astype('float32') / 255.0  # normalize like training
-        img = img.reshape(1, 28, 28, 1)  # add batch and channel dims
+        img = np.array(image).astype('float32') / 255.0
+        img = img.reshape(1, 28, 28, 1)
         prediction = model.predict(img)
         return prediction
     except Exception as e:
