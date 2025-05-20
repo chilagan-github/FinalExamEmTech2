@@ -21,15 +21,12 @@ def load_fashion_model():
         return None
     
     try:
-        # Direct load with custom_objects to handle batch_shape
-        model = tf.keras.models.load_model(
-            model_path, 
-            compile=False,
-        )
+        model = tf.keras.models.load_model(model_path, compile=False)
         return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
+
 
 # Preprocess and predict function
 def import_and_predict(image_data, model):
