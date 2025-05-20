@@ -25,7 +25,6 @@ def load_fashion_model():
         model = tf.keras.models.load_model(
             model_path, 
             compile=False,
-            custom_objects={'batch_shape': None}
         )
         return model
     except Exception as e:
