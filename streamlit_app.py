@@ -35,15 +35,24 @@ def load_fashion_model():
             tf.keras.layers.Dense(10, activation='softmax')
         ])
         
-        # Try to load weights
+        # Let's try different loading methods
         try:
             # First try loading the whole model
-            model = tf.keras.models.load_model(model_path, compile=False)
-        except:
-            # If that fails, try loading just the weights
-            model.load_weights(model_path)
-            
-        return model
+            loaded_model = tf.keras.models.load_model(model_path, compile=False)
+            st.success("Successfully loaded the complete model")
+            return loaded_model
+        except Exception as e1:
+            st.warning(f"Could not load complete model: {e1}")
+            try:
+                # If that fails, try loading just the weights
+                model.load_weights(model_path)
+                st.success("Successfully loaded the model weights")
+                return model
+            except Exception as e2:
+                st.error(f"Could not load weights: {e2}")
+                # Last resort: build and return the model without weights
+                st.warning("Returning model with random weights - predictions will be inaccurate")
+                return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None
@@ -52,11 +61,22 @@ def load_fashion_model():
 def import_and_predict(image_data, model):
     try:
         size = (28, 28)
-        # Convert to grayscale, resize and invert colors if needed (Fashion MNIST is white on black)
+        # Convert to grayscale and resize
         image = ImageOps.grayscale(ImageOps.fit(image_data, size, Image.Resampling.LANCZOS))
         
-        # Convert to numpy array
-        img = np.array(image).astype('float32') / 255.0  # Normalize to 0-1
+        # Fashion MNIST has white items on black background
+        # Check if we need to invert colors - if the image is predominantly dark (like a photo)
+        img_array = np.array(image)
+        mean_pixel = np.mean(img_array)
+        if mean_pixel > 128:  # If image is predominantly bright
+            image = ImageOps.invert(image)  # Invert to match Fashion MNIST
+        
+        # Convert to numpy array and normalize exactly as in training
+        img = np.array(image).astype('float32') / 255.0
+        
+        # Show processed image for debugging
+        st.write("Processed image (how the model sees it):")
+        st.image(img, width=150)
         
         # Reshape to (1, 28, 28, 1)
         img_reshape = img.reshape(1, 28, 28, 1)
