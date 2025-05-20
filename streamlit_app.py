@@ -14,7 +14,7 @@ st.set_page_config(
 
 @st.cache_resource
 def load_fashion_model():
-    model_path = "best_fashion_cnn_model_tf"  # folder, not .h5
+    model_path = "best_fashion_cnn_model(1).h5"  # folder, not .h5
     if not os.path.exists(model_path):
         st.error(f"Model folder not found: {model_path}")
         return None
