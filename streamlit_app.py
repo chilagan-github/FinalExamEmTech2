@@ -19,12 +19,21 @@ def load_fashion_model():
 
     model = Sequential([
         Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+        BatchNormalization(),
         MaxPooling2D(pool_size=(2, 2)),
+        Dropout(0.2),
+
         Conv2D(64, (3, 3), activation='relu'),
+        BatchNormalization(),
         MaxPooling2D(pool_size=(2, 2)),
-        Flatten(),
-        Dense(128, activation='relu'),
         Dropout(0.3),
+
+        Conv2D(128, (3, 3), activation='relu'),
+        BatchNormalization(),
+        Dropout(0.4),
+
+        GlobalAveragePooling2D(),
+
         Dense(10, activation='softmax')
     ])
 
@@ -38,7 +47,7 @@ def load_fashion_model():
     except Exception as e:
         st.error(f"Error loading weights: {e}")
         return None
-
+        
 def import_and_predict(image_data, model):
     try:
         size = (28, 28)
