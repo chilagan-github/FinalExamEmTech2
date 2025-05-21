@@ -33,9 +33,8 @@ def load_fashion_model():
         BatchNormalization(),
         Dropout(0.4),
 
-        Flatten(),
-        Dense(128, activation='relu'),
-        Dropout(0.5),
+        GlobalAveragePooling2D(),
+        
         Dense(10, activation='softmax')
     ])
 
