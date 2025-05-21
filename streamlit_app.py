@@ -16,7 +16,7 @@ st.set_page_config(
 # Load model with cached resource
 @st.cache_resource
 def load_fashion_model():
-    weights_path = "best_fashion_cnn_model_no_mlp(1).h5"
+    weights_path = "best_fashion_cnn_model_no_mlp(2).h5"
 
     model = Sequential([
         Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
