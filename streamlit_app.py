@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image, ImageOps
 import os
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization, GlobalAveragePooling2D
 
 st.set_page_config(
     page_title="Fashion Classifier",
